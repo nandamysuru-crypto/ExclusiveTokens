@@ -68,6 +68,7 @@
       margin-top:12px;
       align-items:center;
       position:relative;
+      min-height: 64px; /* gives a stable area when btn becomes absolute */
     }
     button{
       appearance:none;
@@ -93,7 +94,8 @@
       background: linear-gradient(135deg, var(--no), #ef4444);
       color:#2a070f;
       flex: 1 1 260px;
-      position:relative; /* will switch to absolute while dodging */
+      position:relative; /* will switch to fixed while dodging */
+      -webkit-tap-highlight-color: transparent;
     }
 
     .hint{
@@ -148,33 +150,11 @@
       gap:14px;
     }
 
-    .photo{
-      width:100%;
-      aspect-ratio: 16 / 9;
-      border-radius:18px;
-      border:1px solid #ffffff2a;
-      overflow:hidden;
-      background:#0000002a;
-      position:relative;
-    }
-    .photo img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      filter: saturate(1.05) contrast(1.03);
-    }
-    .photo::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: radial-gradient(800px 300px at 50% 0%, #ffffff18, transparent 60%);
-      pointer-events:none;
-    }
+    /* photo block removed */
 
     .bigMsg{
       text-align:center;
-      padding:6px 6px 0;
+      padding:10px 6px 6px;
     }
     .bigMsg h2{
       margin:8px 0 6px;
@@ -268,14 +248,7 @@
       </div>
 
       <div class="modalBody">
-        <div class="photo">
-          <!-- Replace this URL with your couple photo -->
-          <img
-            alt="Us 💛"
-            src="https://images.unsplash.com/photo-1520975958225-91b1b0d6f0d4?auto=format&fit=crop&w=1600&q=80"
-          />
-        </div>
-
+        <!-- Photo removed: only the existing message content remains -->
         <div class="bigMsg">
           <h2>💛 Ankita Loves Nanda 💛</h2>
           <p>
@@ -298,16 +271,10 @@
   <script>
     const btnLove = document.getElementById('btnLove');
     const btnNo = document.getElementById('btnNo');
-    const btnArea = document.getElementById('btnArea');
     const overlay = document.getElementById('overlay');
     const closeBtn = document.getElementById('closeBtn');
     const toast = document.getElementById('toast');
     const hint = document.getElementById('hint');
-
-    // --- Playful dodging logic (NOT impossible; just teases a few times) ---
-    let dodgeCount = 0;
-    const maxDodges = 6;          // after this, it stops running and becomes normal
-    const dodgeDistance = 140;    // how far it tries to jump
 
     function showToast(msg){
       toast.textContent = msg;
@@ -316,95 +283,89 @@
       showToast._t = setTimeout(()=> toast.classList.remove('show'), 1200);
     }
 
-    function makeAbsoluteIfNeeded(){
-      const style = getComputedStyle(btnNo);
-      if(style.position !== 'absolute'){
-        const r = btnNo.getBoundingClientRect();
-        const a = btnArea.getBoundingClientRect();
-        btnNo.style.position = 'absolute';
-        btnNo.style.left = (r.left - a.left) + 'px';
-        btnNo.style.top  = (r.top  - a.top ) + 'px';
-      }
-      btnArea.style.minHeight = btnArea.offsetHeight + 'px';
-    }
-
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
-    function dodge(event){
-      if(dodgeCount >= maxDodges) return; // stop dodging
+    // --- Make red button truly unclickable + always dodgy across the screen ---
+    // Strategy:
+    // 1) On first dodge, switch it to position:fixed so it can run anywhere.
+    // 2) Each hover / pointer move teleports it to a far random safe position.
+    // 3) Prevent clicks/taps entirely.
+    let initialized = false;
 
-      dodgeCount++;
-      makeAbsoluteIfNeeded();
+    function initRunaway(){
+      if(initialized) return;
+      initialized = true;
 
-      const area = btnArea.getBoundingClientRect();
-      const b = btnNo.getBoundingClientRect();
-
-      // random new position near current, away from the pointer
-      const px = event.clientX;
-      const py = event.clientY;
-
-      const centerX = b.left + b.width / 2;
-      const centerY = b.top + b.height / 2;
-
-      let dx = centerX - px;
-      let dy = centerY - py;
-
-      // normalize-ish
-      const len = Math.max(1, Math.hypot(dx, dy));
-      dx /= len; dy /= len;
-
-      // add randomness
-      const randAngle = (Math.random() - 0.5) * 1.2;
-      const cos = Math.cos(randAngle), sin = Math.sin(randAngle);
-      const ndx = dx * cos - dy * sin;
-      const ndy = dx * sin + dy * cos;
-
-      const jump = dodgeDistance * (0.65 + Math.random() * 0.7);
-
-      const a = btnArea.getBoundingClientRect();
-      const currentLeft = parseFloat(btnNo.style.left || "0");
-      const currentTop  = parseFloat(btnNo.style.top  || "0");
-
-      const newLeft = clamp(currentLeft + ndx * jump, 0, a.width - b.width);
-      const newTop  = clamp(currentTop  + ndy * jump, 0, a.height - b.height);
-
-      btnNo.style.transform = 'translateZ(0)'; // keep smooth
-      btnNo.style.left = newLeft + 'px';
-      btnNo.style.top  = newTop + 'px';
-
-      const lines = [
-        "😂 Oho! Button is feeling shy…",
-        "😆 Nice try! It’s in mood of drama.",
-        "🙈 It said: ‘Nope, not today!’",
-        "🤭 Ankita power detected… escaping!",
-        "😤 This button is pure filmy villain!"
-      ];
-      showToast(lines[Math.floor(Math.random() * lines.length)]);
-
-      if(dodgeCount === maxDodges){
-        hint.textContent = "Okay okay 😭 it stopped running. You can click it now (but please don’t).";
-        showToast("🥲 Okay… I surrender. You can click it now.");
-      }
+      // lock current position, then switch to fixed so it can roam the whole viewport
+      const r = btnNo.getBoundingClientRect();
+      btnNo.style.position = 'fixed';
+      btnNo.style.left = r.left + 'px';
+      btnNo.style.top  = r.top  + 'px';
+      btnNo.style.zIndex = 9999;
     }
 
-    // works for mouse and touch/pen
-    btnNo.addEventListener('pointerenter', dodge);
-    btnNo.addEventListener('pointermove', (e) => {
-      // only dodge when pointer is quite close
-      if(dodgeCount < maxDodges) dodge(e);
+    function randomSafePosition(){
+      const b = btnNo.getBoundingClientRect();
+      const pad = 12;
+      const maxX = window.innerWidth  - b.width  - pad;
+      const maxY = window.innerHeight - b.height - pad;
+
+      const x = clamp(pad + Math.random() * (maxX - pad), pad, maxX);
+      const y = clamp(pad + Math.random() * (maxY - pad), pad, maxY);
+      return {x, y};
+    }
+
+    function dodgeEveryTime(e){
+      initRunaway();
+
+      const lines = [
+        "😂 Nice try! Not today.",
+        "😆 Filmy drama mode: ON.",
+        "🙈 Nope nope nope!",
+        "🤭 Ankita power detected… escaping!",
+        "🏃‍♂️ It ran away in fear of consequences!"
+      ];
+      showToast(lines[Math.floor(Math.random() * lines.length)]);
+      hint.textContent = "😌 The red button is unclickable. Only love wins here.";
+
+      const {x, y} = randomSafePosition();
+      // tiny pop animation
+      btnNo.style.transform = 'scale(0.98)';
+      btnNo.style.left = x + 'px';
+      btnNo.style.top  = y + 'px';
+      requestAnimationFrame(() => btnNo.style.transform = 'scale(1)');
+    }
+
+    // Dodge on hover/approach (mouse) and on touch proximity (mobile-ish)
+    btnNo.addEventListener('pointerenter', dodgeEveryTime);
+    btnNo.addEventListener('pointermove', dodgeEveryTime);
+    btnNo.addEventListener('pointerdown', (e) => {
+      // if someone tries to tap it, it jumps instantly
+      e.preventDefault();
+      e.stopPropagation();
+      dodgeEveryTime(e);
     });
 
-    btnNo.addEventListener('click', () => {
-      // If she clicks it (after dodges), keep it funny and sweet.
-      showToast("😳 Ayo! That hurts… but I still love you.");
-      alert("🤣 You actually clicked that?!\n\nOkay, noted: Nanda will behave.\nStill… Ankita is my favorite person 💛");
+    // hard-block click (extra safety)
+    btnNo.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showToast("😌 Not allowed. Only green button is valid 💚");
+    });
+
+    // If the window resizes, keep it inside the viewport
+    window.addEventListener('resize', () => {
+      if(!initialized) return;
+      const {x, y} = randomSafePosition();
+      btnNo.style.left = x + 'px';
+      btnNo.style.top  = y + 'px';
     });
 
     // --- Love button: show romance overlay + shower ---
     btnLove.addEventListener('click', () => {
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden','false');
-      startShower(140); // amount of particles
+      startShower(140);
     });
 
     closeBtn.addEventListener('click', () => {
@@ -457,7 +418,6 @@
           el.remove();
           return;
         }
-        // ease-in (falling)
         const eased = t * t;
         const x = startX + drift * t;
         const y = startY + (endY - startY) * eased;
