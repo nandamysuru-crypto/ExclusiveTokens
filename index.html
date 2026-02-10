@@ -1,10 +1,473 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>My GitHub Page</title>
-  </head>
-  <body>
-    <h1>Hello from GitHub Pages!</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For Ankita 💛</title>
+  <style>
+    :root{
+      --bg1:#0f1020;
+      --bg2:#1b1d3a;
+      --card:#ffffff10;
+      --text:#f7f7ff;
+      --muted:#d8d8ffcc;
+      --ok:#4ade80;
+      --no:#fb7185;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, #ff5fa233 0%, transparent 60%),
+        radial-gradient(900px 700px at 80% 20%, #ffd1662e 0%, transparent 55%),
+        radial-gradient(1000px 900px at 50% 100%, #7c3aed22 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      overflow:hidden;
+    }
+    .wrap{ width:min(860px, 100%); position:relative; }
+
+    .card{
+      background: linear-gradient(180deg, #ffffff14, #ffffff08);
+      border:1px solid #ffffff22;
+      border-radius:22px;
+      padding:28px 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .title{
+      font-size: clamp(26px, 3vw, 38px);
+      margin:0 0 10px;
+    }
+    .subtitle{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size: 16px;
+    }
+    .apology{
+      background: #0000001f;
+      border:1px solid #ffffff22;
+      border-radius:18px;
+      padding:16px;
+      margin:16px 0 18px;
+      line-height:1.65;
+    }
+
+    .buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:12px;
+      align-items:center;
+      position:relative;
+    }
+    button{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:14px 16px;
+      font-weight:800;
+      letter-spacing:.2px;
+      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+      user-select:none;
+      touch-action: manipulation;
+    }
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    .btn-love{
+      background: linear-gradient(135deg, var(--ok), #22c55e);
+      color:#062213;
+      flex: 1 1 260px;
+    }
+    .btn-no{
+      background: linear-gradient(135deg, var(--no), #ef4444);
+      color:#2a070f;
+      flex: 1 1 260px;
+      position:relative; /* will switch to absolute while dodging */
+    }
+
+    .hint{
+      margin-top:10px;
+      color:#ffffffb3;
+      font-size:13px;
+    }
+
+    /* Overlay */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: radial-gradient(900px 700px at 50% 30%, #ffffff14, #000000cc);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      z-index:50;
+    }
+    .overlay.show{ display:flex; }
+
+    .modal{
+      width:min(920px, 100%);
+      background: linear-gradient(180deg, #ffffff18, #ffffff10);
+      border:1px solid #ffffff28;
+      border-radius:24px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .modalHead{
+      padding:18px 18px 8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+    .close{
+      background:#ffffff18;
+      color:#fff;
+      border:1px solid #ffffff2a;
+      padding:10px 14px;
+      border-radius:999px;
+      box-shadow:none;
+      font-weight:800;
+    }
+    .close:hover{ filter: brightness(1.06); }
+
+    .modalBody{
+      padding:0 18px 18px;
+      display:grid;
+      gap:14px;
+    }
+
+    .photo{
+      width:100%;
+      aspect-ratio: 16 / 9;
+      border-radius:18px;
+      border:1px solid #ffffff2a;
+      overflow:hidden;
+      background:#0000002a;
+      position:relative;
+    }
+    .photo img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      filter: saturate(1.05) contrast(1.03);
+    }
+    .photo::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(800px 300px at 50% 0%, #ffffff18, transparent 60%);
+      pointer-events:none;
+    }
+
+    .bigMsg{
+      text-align:center;
+      padding:6px 6px 0;
+    }
+    .bigMsg h2{
+      margin:8px 0 6px;
+      font-size: clamp(26px, 3.2vw, 44px);
+      letter-spacing:.3px;
+    }
+    .bigMsg p{
+      margin:0;
+      color:#ffffffd1;
+      line-height:1.6;
+      font-size: 15px;
+    }
+    .masala{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+    }
+    .chip{
+      background:#ffffff14;
+      border:1px solid #ffffff24;
+      padding:8px 10px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:13px;
+      color:#fff;
+    }
+
+    /* Shower particles */
+    .particle{
+      position:fixed;
+      top:-40px;
+      left:0;
+      font-size: 22px;
+      will-change: transform, opacity;
+      pointer-events:none;
+      z-index:60;
+      text-shadow: 0 6px 18px rgba(0,0,0,.35);
+    }
+
+    /* Small toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:#111827cc;
+      color:#fff;
+      border:1px solid #ffffff22;
+      padding:10px 12px;
+      border-radius:999px;
+      font-weight:700;
+      box-shadow: 0 10px 28px rgba(0,0,0,.3);
+      display:none;
+      z-index:70;
+    }
+    .toast.show{ display:block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">Hey Ankita 🥺💛</h1>
+      <p class="subtitle">
+        I know we’re good now… but I wanted to do a tiny *drama-romcom gesture* to make you smile 😄
+      </p>
+
+      <div class="apology">
+        <strong>My sorry + my promise:</strong><br/>
+        If I ever act dumb again, you have full rights to give me “the look” 👀 and I’ll fix it instantly.
+        You’re my peace, my chaos, and my favorite person — all in one. 💫
+      </div>
+
+      <div class="buttons" id="btnArea">
+        <button class="btn-love" id="btnLove">I forgive you & I love you 💚</button>
+        <button class="btn-no" id="btnNo">I don’t forgive you & I hate you 😤</button>
+      </div>
+
+      <div class="hint" id="hint">
+        (P.S. One of these buttons is a little… dramatic. Like someone I know 😌)
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="modalHead">
+        <div style="font-weight:900; letter-spacing:.2px;">Romance Mode: ON ✨</div>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="photo">
+          <!-- Replace this URL with your couple photo -->
+          <img
+            alt="Us 💛"
+            src="https://images.unsplash.com/photo-1520975958225-91b1b0d6f0d4?auto=format&fit=crop&w=1600&q=80"
+          />
+        </div>
+
+        <div class="bigMsg">
+          <h2>💛 Ankita Loves Nanda 💛</h2>
+          <p>
+            Twist-y masala update: You’re the heroine, I’m the idiot hero, and our story is
+            officially a blockbuster — with extra romance, extra comedy, and zero ego. 😄🎬
+          </p>
+          <div class="masala">
+            <span class="chip">Unlimited hugs coupon 🤗</span>
+            <span class="chip">No more silly mistakes 🤞</span>
+            <span class="chip">Extra kisses tax 😘</span>
+            <span class="chip">Lifetime “mine” contract 💍</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">😂 Oho! Button is feeling shy…</div>
+
+  <script>
+    const btnLove = document.getElementById('btnLove');
+    const btnNo = document.getElementById('btnNo');
+    const btnArea = document.getElementById('btnArea');
+    const overlay = document.getElementById('overlay');
+    const closeBtn = document.getElementById('closeBtn');
+    const toast = document.getElementById('toast');
+    const hint = document.getElementById('hint');
+
+    // --- Playful dodging logic (NOT impossible; just teases a few times) ---
+    let dodgeCount = 0;
+    const maxDodges = 6;          // after this, it stops running and becomes normal
+    const dodgeDistance = 140;    // how far it tries to jump
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.classList.remove('show'), 1200);
+    }
+
+    function makeAbsoluteIfNeeded(){
+      const style = getComputedStyle(btnNo);
+      if(style.position !== 'absolute'){
+        const r = btnNo.getBoundingClientRect();
+        const a = btnArea.getBoundingClientRect();
+        btnNo.style.position = 'absolute';
+        btnNo.style.left = (r.left - a.left) + 'px';
+        btnNo.style.top  = (r.top  - a.top ) + 'px';
+      }
+      btnArea.style.minHeight = btnArea.offsetHeight + 'px';
+    }
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function dodge(event){
+      if(dodgeCount >= maxDodges) return; // stop dodging
+
+      dodgeCount++;
+      makeAbsoluteIfNeeded();
+
+      const area = btnArea.getBoundingClientRect();
+      const b = btnNo.getBoundingClientRect();
+
+      // random new position near current, away from the pointer
+      const px = event.clientX;
+      const py = event.clientY;
+
+      const centerX = b.left + b.width / 2;
+      const centerY = b.top + b.height / 2;
+
+      let dx = centerX - px;
+      let dy = centerY - py;
+
+      // normalize-ish
+      const len = Math.max(1, Math.hypot(dx, dy));
+      dx /= len; dy /= len;
+
+      // add randomness
+      const randAngle = (Math.random() - 0.5) * 1.2;
+      const cos = Math.cos(randAngle), sin = Math.sin(randAngle);
+      const ndx = dx * cos - dy * sin;
+      const ndy = dx * sin + dy * cos;
+
+      const jump = dodgeDistance * (0.65 + Math.random() * 0.7);
+
+      const a = btnArea.getBoundingClientRect();
+      const currentLeft = parseFloat(btnNo.style.left || "0");
+      const currentTop  = parseFloat(btnNo.style.top  || "0");
+
+      const newLeft = clamp(currentLeft + ndx * jump, 0, a.width - b.width);
+      const newTop  = clamp(currentTop  + ndy * jump, 0, a.height - b.height);
+
+      btnNo.style.transform = 'translateZ(0)'; // keep smooth
+      btnNo.style.left = newLeft + 'px';
+      btnNo.style.top  = newTop + 'px';
+
+      const lines = [
+        "😂 Oho! Button is feeling shy…",
+        "😆 Nice try! It’s in mood of drama.",
+        "🙈 It said: ‘Nope, not today!’",
+        "🤭 Ankita power detected… escaping!",
+        "😤 This button is pure filmy villain!"
+      ];
+      showToast(lines[Math.floor(Math.random() * lines.length)]);
+
+      if(dodgeCount === maxDodges){
+        hint.textContent = "Okay okay 😭 it stopped running. You can click it now (but please don’t).";
+        showToast("🥲 Okay… I surrender. You can click it now.");
+      }
+    }
+
+    // works for mouse and touch/pen
+    btnNo.addEventListener('pointerenter', dodge);
+    btnNo.addEventListener('pointermove', (e) => {
+      // only dodge when pointer is quite close
+      if(dodgeCount < maxDodges) dodge(e);
+    });
+
+    btnNo.addEventListener('click', () => {
+      // If she clicks it (after dodges), keep it funny and sweet.
+      showToast("😳 Ayo! That hurts… but I still love you.");
+      alert("🤣 You actually clicked that?!\n\nOkay, noted: Nanda will behave.\nStill… Ankita is my favorite person 💛");
+    });
+
+    // --- Love button: show romance overlay + shower ---
+    btnLove.addEventListener('click', () => {
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      startShower(140); // amount of particles
+    });
+
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay){
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden','true');
+      }
+    });
+
+    // --- Romantic shower animation ---
+    function startShower(count){
+      const emojis = ["💛","💖","💘","💞","✨","🌸","🌺","🥰","😘","🫶","💫"];
+      for(let i=0; i<count; i++){
+        setTimeout(() => spawnParticle(emojis), i * 18);
+      }
+    }
+
+    function spawnParticle(emojis){
+      const el = document.createElement('div');
+      el.className = 'particle';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+      const startX = Math.random() * window.innerWidth;
+      const drift = (Math.random() - 0.5) * 220;
+      const dur = 2600 + Math.random() * 2200;
+      const size = 18 + Math.random() * 16;
+
+      el.style.left = startX + 'px';
+      el.style.fontSize = size + 'px';
+      el.style.opacity = (0.75 + Math.random() * 0.25).toFixed(2);
+
+      document.body.appendChild(el);
+
+      const startY = -40;
+      const endY = window.innerHeight + 60;
+
+      const startRot = (Math.random() * 60 - 30);
+      const endRot = startRot + (Math.random() * 260 - 130);
+
+      const startTime = performance.now();
+
+      function tick(now){
+        const t = (now - startTime) / dur;
+        if(t >= 1){
+          el.remove();
+          return;
+        }
+        // ease-in (falling)
+        const eased = t * t;
+        const x = startX + drift * t;
+        const y = startY + (endY - startY) * eased;
+
+        el.style.transform = `translate(${x - startX}px, ${y - startY}px) rotate(${startRot + (endRot-startRot)*t}deg)`;
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+  </script>
+</body>
 </html>
