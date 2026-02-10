@@ -41,7 +41,9 @@
       padding:28px 24px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
+      position:relative; /* needed for in-card runaway button */
     }
+
     .title{
       font-size: clamp(26px, 3vw, 38px);
       margin:0 0 10px;
@@ -68,7 +70,7 @@
       margin-top:12px;
       align-items:center;
       position:relative;
-      min-height:64px; /* stable area once red button becomes fixed */
+      min-height:64px; /* stable area */
     }
     button{
       appearance:none;
@@ -94,7 +96,7 @@
       background: linear-gradient(135deg, var(--no), #ef4444);
       color:#2a070f;
       flex: 1 1 260px;
-      position:relative; /* switches to fixed after first dodge */
+      position:relative; /* becomes absolute inside card */
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -117,14 +119,16 @@
     }
     .overlay.show{ display:flex; }
 
+    /* Make the message readable (less transparent than before) */
     .modal{
       width:min(920px, 100%);
-      background: linear-gradient(180deg, #ffffff18, #ffffff10);
-      border:1px solid #ffffff28;
+      background: rgba(10, 12, 24, 0.92);
+      border:1px solid #ffffff2a;
       border-radius:24px;
       box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
+      backdrop-filter: blur(10px);
     }
     .modalHead{
       padding:18px 18px 8px;
@@ -132,6 +136,7 @@
       justify-content:space-between;
       align-items:center;
       gap:12px;
+      border-bottom: 1px solid #ffffff1c;
     }
     .close{
       background:#ffffff18;
@@ -161,7 +166,7 @@
     }
     .bigMsg p{
       margin:0;
-      color:#ffffffd1;
+      color:#ffffffea;
       line-height:1.6;
       font-size: 15px;
     }
@@ -211,29 +216,34 @@
       z-index:70;
     }
     .toast.show{ display:block; }
+
+    /* Utility to hide old card content after green click */
+    .gone{ display:none !important; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1 class="title">Hey Ankita 🥺💛</h1>
-      <p class="subtitle">
-        I know we’re good now… but I wanted to do a tiny <em>drama-romcom gesture</em> to make you smile 😄
-      </p>
+    <div class="card" id="card">
+      <div id="cardContent">
+        <h1 class="title">Hey Ankita 🥺💛</h1>
+        <p class="subtitle">
+          I know we’re good now… but I wanted to do a tiny <em>drama-romcom gesture</em> to make you smile 😄
+        </p>
 
-      <div class="apology">
-        <strong>My sorry + my promise:</strong><br/>
-        If I ever act dumb again, you have full rights to give me “the look” 👀 and I’ll fix it instantly.
-        You’re my peace, my chaos, and my favorite person — all in one. 💫
-      </div>
+        <div class="apology">
+          <strong>My sorry + my promise:</strong><br/>
+          If I ever act dumb again, you have full rights to give me “the look” 👀 and I’ll fix it instantly.
+          You’re my peace, my chaos, and my favorite person — all in one. 💫
+        </div>
 
-      <div class="buttons" id="btnArea">
-        <button class="btn-love" id="btnLove">I forgive you & I love you 💚</button>
-        <button class="btn-no" id="btnNo">I don’t forgive you & I hate you 😤</button>
-      </div>
+        <div class="buttons" id="btnArea">
+          <button class="btn-love" id="btnLove">I forgive you & I love you 💚</button>
+          <button class="btn-no" id="btnNo">I don’t forgive you & I hate you 😤</button>
+        </div>
 
-      <div class="hint" id="hint">
-        (P.S. One of these buttons is a little… dramatic. Like someone I know 😌)
+        <div class="hint" id="hint">
+          (P.S. One of these buttons is a little… dramatic. Like someone I know 😌)
+        </div>
       </div>
     </div>
   </div>
@@ -246,7 +256,6 @@
       </div>
 
       <div class="modalBody">
-        <!-- Photo removed: only the existing messages remain -->
         <div class="bigMsg">
           <h2>💛 Ankita Loves Nanda 💛</h2>
           <p>
@@ -273,6 +282,8 @@
     const closeBtn = document.getElementById('closeBtn');
     const toast = document.getElementById('toast');
     const hint = document.getElementById('hint');
+    const card = document.getElementById('card');
+    const cardContent = document.getElementById('cardContent');
 
     function showToast(msg){
       toast.textContent = msg;
@@ -283,42 +294,46 @@
 
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
-    // --- Red button: visible initially, then runs forever and stays on-screen ---
+    // --- Red button: runs ONLY inside the main card ---
     let runaway = false;
 
     function enableRunawayMode(){
       if(runaway) return;
       runaway = true;
 
-      // lock its current visual position and switch to fixed
-      const r = btnNo.getBoundingClientRect();
-      btnNo.style.position = 'fixed';
-      btnNo.style.left = r.left + 'px';
-      btnNo.style.top  = r.top  + 'px';
+      // lock its position relative to the card
+      const b = btnNo.getBoundingClientRect();
+      const c = card.getBoundingClientRect();
+
+      btnNo.style.position = 'absolute';
+      btnNo.style.left = (b.left - c.left) + 'px';
+      btnNo.style.top  = (b.top  - c.top ) + 'px';
       btnNo.style.margin = '0';
-      btnNo.style.zIndex = 99999;
+      btnNo.style.zIndex = 20;
     }
 
-    function safeRandomPosition(){
+    function safeRandomPositionInsideCard(){
       const b = btnNo.getBoundingClientRect();
-      const pad = 10;
+      const c = card.getBoundingClientRect();
+      const pad = 12;
 
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const cardW = c.width;
+      const cardH = c.height;
 
-      const maxX = Math.max(pad, vw - b.width - pad);
-      const maxY = Math.max(pad, vh - b.height - pad);
+      const bw = b.width;
+      const bh = b.height;
 
-      // If viewport is smaller than button, pin to padding (avoid negative positions)
-      const x = (vw - b.width < pad * 2) ? pad : (pad + Math.random() * (maxX - pad));
-      const y = (vh - b.height < pad * 2) ? pad : (pad + Math.random() * (maxY - pad));
+      const maxX = Math.max(pad, cardW - bw - pad);
+      const maxY = Math.max(pad, cardH - bh - pad);
+
+      const x = (cardW - bw < pad * 2) ? pad : (pad + Math.random() * (maxX - pad));
+      const y = (cardH - bh < pad * 2) ? pad : (pad + Math.random() * (maxY - pad));
 
       return { x: Math.round(x), y: Math.round(y) };
     }
 
     function dodgeAway(e){
       enableRunawayMode();
-
       hint.textContent = "😌 The red button is in permanent drama mode. Only green works 💚";
 
       const lines = [
@@ -331,9 +346,10 @@
       showToast(lines[Math.floor(Math.random() * lines.length)]);
 
       const b = btnNo.getBoundingClientRect();
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const pad = 10;
+      const c = card.getBoundingClientRect();
+      const pad = 12;
 
+      // Pointer position relative to viewport
       const px = (e && typeof e.clientX === "number") ? e.clientX : (b.left + b.width/2);
       const py = (e && typeof e.clientY === "number") ? e.clientY : (b.top + b.height/2);
 
@@ -352,20 +368,25 @@
       const ndx = dx * cos - dy * sin;
       const ndy = dx * sin + dy * cos;
 
-      const jump = 160 + Math.random() * 220;
+      const jump = 140 + Math.random() * 200;
 
-      let newLeft = parseFloat(btnNo.style.left || b.left) + ndx * jump;
-      let newTop  = parseFloat(btnNo.style.top  || b.top ) + ndy * jump;
+      // current absolute-pos left/top (relative to card)
+      const curLeft = parseFloat(btnNo.style.left || (b.left - c.left));
+      const curTop  = parseFloat(btnNo.style.top  || (b.top  - c.top ));
 
-      const maxLeft = Math.max(pad, vw - b.width - pad);
-      const maxTop  = Math.max(pad, vh - b.height - pad);
+      let newLeft = curLeft + ndx * jump;
+      let newTop  = curTop  + ndy * jump;
+
+      // clamp inside card
+      const maxLeft = Math.max(pad, c.width  - b.width  - pad);
+      const maxTop  = Math.max(pad, c.height - b.height - pad);
 
       newLeft = clamp(newLeft, pad, maxLeft);
       newTop  = clamp(newTop,  pad, maxTop);
 
-      // sometimes randomize to prevent corner-trapping
+      // sometimes randomize to prevent corner trapping
       if(Math.random() < 0.25){
-        const rpos = safeRandomPosition();
+        const rpos = safeRandomPositionInsideCard();
         newLeft = rpos.x;
         newTop = rpos.y;
       }
@@ -398,16 +419,19 @@
       showToast("😌 Nope. Only 💚 is allowed.");
     });
 
-    // Keep it on-screen on resize
+    // Keep it inside the card on resize
     window.addEventListener('resize', () => {
       if(!runaway) return;
-      const p = safeRandomPosition();
+      const p = safeRandomPositionInsideCard();
       btnNo.style.left = p.x + 'px';
       btnNo.style.top  = p.y + 'px';
     });
 
-    // --- Love button: show romance overlay + shower ---
+    // --- Love button: show romance overlay + shower + hide old content for readability ---
     btnLove.addEventListener('click', () => {
+      // remove/hide old text components so message is crystal clear
+      cardContent.classList.add('gone');
+
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden','false');
       startShower(140);
